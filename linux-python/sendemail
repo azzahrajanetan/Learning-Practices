@@ -1,0 +1,42 @@
+#!/usr/bin/env python3.8
+
+import os
+import smtplib
+from getpass import getpass
+
+# getting user and password:
+
+def get_info():
+    user_name = input("Please enter the following information.\nYour name: ")
+    gmail_user = input("Your email address: ")
+    gmail_pwd = getpass(prompt='Please enter your password: ')
+    recp_name = input("Recipient's name: ")
+    receiver = input("Recipient's email address: ")
+    subject_text = input("Please type your email. \nEmail Subject: ")
+    email_body = input("Email message: ")
+    return (user_name, gmail_user, gmail_pwd, recp_name, receiver, subject_text, email_body)
+
+# message/email details
+user_name, gmail_user, gmail_pwd, recp_name, receiver, subject_text, email_body = get_info()
+
+sender = gmail_user
+recipient = [f'{receiver}']
+
+# building the message
+message = f"""From: {user_name} <{gmail_user}>
+To: {recp_name} <{receiver}>
+Subject: {subject_text}
+
+{email_body}
+"""
+#sending email:
+try:
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(gmail_user, gmail_pwd)
+    server.sendmail(sender, recipient, message) 
+    print("Successfully sent email")
+except smtplib.SMTPException:
+    print(f"Error: unable to send email")

@@ -1,0 +1,14 @@
+#!/usr/bin/env python3.10
+
+# This is just a demo practice to use sys
+
+import sys
+
+# print(f"File location: {sys.argv[0]}"): prints file location/file
+# print(f"Names: {sys.argv[1:]}"): prints lists of positional argument
+
+names = sys.argv[1:]
+
+for name in names:
+    print(f"Hello, {name}!")
+

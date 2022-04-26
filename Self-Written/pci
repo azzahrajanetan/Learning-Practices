@@ -1,0 +1,41 @@
+#!/usr/bin/env python3.10
+
+#PCI = per capita income
+#Calculating the household per capita income
+
+def gather_info():
+    members = int(input("Q1.How many family members live in your household? : "))
+    income1 = float(input("Q2.What is your monthly income? (in SGD) : "))
+    income2 = float(input("Q3.What is your spouse's monthly income? (in SGD) : "))
+    other_income = input("Q4.Is there any other income from other family members of the household? (Yes/No) : ").lower().strip()
+    if other_income.startswith("y"):
+        income3 = float(input("Q5.What is the other monthly income? (in SGD) : "))
+        return (members, income1, income2, other_income, income3)
+    else:
+        income3 = float(0)
+        return (members, income1, income2, other_income, income3)
+
+def calculate_pci(members, income1, income2, income3, other_income='yes'):
+    """
+    Return the Per Capita Income for the
+    given incomes 1, 2, and 3 (if any).
+    """
+    members = float(members)
+    if other_income == 'yes':
+        pci = ((income1 + income2 + income3) / members)
+    else:
+        pci = ((income1 + income2) / members)
+    return pci
+
+while True:
+    members, income1, income2, other_income, income3 = gather_info()
+    if other_income.startswith('n'):
+        pci = "{:.2f}".format(calculate_pci(members, income1, income2, income3))
+        print(f"Your household PCI for {members} family members is ${pci}.")
+        break
+    elif other_income.startswith('y'):
+        pci = "{:.2f}".format(calculate_pci(members, income1, income2, income3))
+        print(f"Your household PCI for {members} family members is ${pci}.")
+        break
+    else:
+        print("Error: Unknown answer for Q4. Please use Yes or No answer.")
