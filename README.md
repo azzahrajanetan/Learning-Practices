@@ -1,6 +1,6 @@
 # Jane's Portfolio
 
-This is a portfolio of the scripts and codes written by me while learning.
+This is a collection of the scripts and codes written by me while learning.
 
 ### Folder: linux-python
 
