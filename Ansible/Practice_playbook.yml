@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  vars:
+    testpath: /home/azzahrajane/Practice/Test
+    reportpath: /home/azzahrajane/Practice/Report
+  tasks:
+    - name: Creating Practice/Test folder
+      file:
+        path: "{{ testpath }}"
+        state: directory
+    - name: Creating multiple test files
+      copy:
+        dest: "{{ testpath }}/{{ item }}"
+        content: | 
+          This is a test file no. {{ range (1, 10) | random }}
+      with_items:
+        - file1.txt
+        - file2.txt
+        - file3.txt
+    - name: Copy Practice/Test folder content to Practice/Report
+      command: cp -r "{{ testpath }}" "{{ reportpath }}"
+    - name: find files in Report folder
+      find:
+        path: "{{ reportpath }}"
+        file_type: file
+        recurse: yes
+        patterns: 'file*'
+        use_regex: true
+      register: renamepath
+    - name: replace test with report in file1
+      replace:
+        path: "{{ item.path }}"
+        regexp: 'test'
+        replace: 'report'
+      with_items:
+        - "{{ renamepath.files }}"
