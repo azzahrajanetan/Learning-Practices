@@ -1,0 +1,70 @@
+#creating new users
+---
+    - hosts: localhost
+      become: true
+      become_method: sudo
+      vars:
+        ansible_become_pass: password
+      tasks:
+        - name: Create new groups
+          group:
+            name: "{{ item }}"
+            state: present
+          loop:
+           - management
+           - operations
+           - sales        
+        - name: Add some users to all 3 groups
+          user:
+            name: "{{ item }}"
+            state: present
+            groups: management, operations, sales
+          loop:
+            - jen
+            - william
+        - name: Add some users to sales groups
+          user:
+            name: "{{ item }}"
+            state: present
+            groups: sales
+          loop:
+            - matt
+            - sam
+            - anne
+            - danny
+        - name: Add some users to operations groups
+          user:
+            name: "{{ item }}"
+            state: present
+            groups: operations
+          loop:
+            - kate
+            - bruce
+        - name: Verify group membership of members
+          shell: groups jen william matt sam anne danny kate bruce
+          register: verify_groups
+        - debug:
+            msg: "{{ verify_groups.stdout_lines }}"
+        #delete users and groups
+        - name: Delete users
+          user:
+            name: "{{ item }}"
+            state: absent
+            remove: true
+          loop:
+            - jen
+            - william
+            - matt
+            - sam
+            - anne
+            - danny
+            - kate
+            - bruce
+        - name: Delete groups
+          group:
+            name: "{{ item }}"
+            state: absent
+          loop:
+            - management
+            - operations
+            - sales
