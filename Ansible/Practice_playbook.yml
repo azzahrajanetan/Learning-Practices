@@ -1,8 +1,8 @@
 ---
 - hosts: localhost
   vars:
-    testpath: /home/azzahrajane/Practice/Test
-    reportpath: /home/azzahrajane/Practice/Report
+    testpath: ./Practice/Test
+    reportpath: ./Practice/Report
   tasks:
     - name: Creating Practice/Test folder
       file:
