@@ -1,0 +1,96 @@
+---
+    - hosts: localhost
+      become: true
+      become_method: sudo
+      vars:
+        ansible_become_pass: password 
+        locked_users: 
+         - bill
+         - susan
+         - juan
+        new_users:
+         - nancy
+         - greg
+         - jeremy
+        other_users:
+         - jason
+         - jason
+         - sally
+        dirs:
+          - /home/bill/
+          - /home/susan/
+          - /home/juan/
+      tasks:
+      #first task
+        - name: Create user and groups 
+          group:
+            name: "{{ item }}"
+            state: present
+          loop: "{{ locked_users + new_users + other_users}} "
+        - name: Create all users and home directories
+          user:
+            name: "{{ item }}"
+            state: present
+            create_home: yes
+            group: "{{ item }}"
+          loop: "{{ locked_users + new_users + other_users}} "
+        #verify user and group
+        - name: Verify group membership of all users
+          shell: groups bill susan juan nancy greg jeremy jason sally
+          register: verify_groups
+        - debug:
+            msg: "{{ verify_groups.stdout_lines }}" 
+        #locking accounts
+        - name: Lock accounts of bill, susan, juan 
+          user:
+            name: "{{ item }}"
+            password_lock: yes
+          loop: "{{ locked_users }} "
+        # changing ownership of bill
+        - name: change ownership of locked_users home directory (recursively) accordingly to lab
+          file:  
+            path: "{{ item[0] }}"
+            state: directory
+            recurse: yes
+            owner: "{{ item[1] }}"
+            group: "{{ item[2] }}"
+            mode: 0750
+            # zip combines newbies and bosslist with dirs and loops through the new lists e.g. [dir0, new0, boss0], [dir1, new1, boss1]
+          loop: "{{ dirs |zip(new_users,other_users) |list}}"
+          #verify change of ownership
+        - name: Verify group membership of all users
+          shell: ls -l /home/
+          register: verify_home
+        - debug:
+            msg: "{{ verify_home.stdout_lines }}" 
+        # checking if nancy has write permissions
+        - name: creating and writing a line
+          block:
+          - lineinfile:
+              path: /home/bill/bill_files_1
+              line: a new line
+              create: yes
+          - shell: cat /home/bill/bill_files_1
+            register: check
+          - debug:
+              var: check.stdout_lines
+          become: yes
+          become_user: nancy          
+       # delete users and groups
+        - name: Delete users
+          user:
+            name: "{{ item }}"
+            state: absent
+            remove: true
+          loop: "{{ locked_users + new_users + other_users }}"
+          ignore_errors: yes
+        - name: Delete groups
+          group:
+            name: "{{ item }}"
+            state: absent
+          loop: "{{ locked_users + new_users + other_users }}"
+        - name: Delete locked_users home directories
+          file:
+            path: "{{ item }}"
+            state: absent
+          loop: "{{ dirs }}"
