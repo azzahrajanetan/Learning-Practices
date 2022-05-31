@@ -55,7 +55,7 @@
             owner: "{{ item[1] }}"
             group: "{{ item[2] }}"
             mode: 0750
-            # zip combines newbies and bosslist with dirs and loops through the new lists e.g. [dir0, new0, boss0], [dir1, new1, boss1]
+            # zip combines new_users and other_users with dirs and loops through the new lists e.g. [dir0, new0, other0], [dir1, new1, other1]
           loop: "{{ dirs |zip(new_users,other_users) |list}}"
           #verify change of ownership
         - name: Verify group membership of all users
