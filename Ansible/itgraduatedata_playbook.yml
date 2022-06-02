@@ -11,21 +11,20 @@
         return_content: yes
         method: GET
       register: unidata
-    - debug:
-        msg: "Course: {{ unidata.json.result.records[item]['course'] }} Year: {{ unidata.json.result.records[item]['year'] }} Sex: {{ unidata.json.result.records[item]['sex'] }} Graduates: {{ unidata.json.result.records[item]['graduates'] }}"
-      loop: "{{ range(0, datanum|int,2) |list }}" # note: ranges for only sex:MF
 
-    - name: Output content for uni graduates to file
+    - name: Save University graduates data into a csv
       shell: echo "Course:{{ unidata.json.result.records[item]['course'] }} Year:{{ unidata.json.result.records[item]['year'] }} Sex:{{ unidata.json.result.records[item]['sex'] }} Graduates:{{ unidata.json.result.records[item]['graduates'] }}" >> it_uni_data.csv
       loop: "{{ range(0,datanum|int,2) |list }}"
 
-    - name: Calculate total number of IT university graduates and print to file
+    - name: Calculate total number of IT university graduates and add to csv file
       set_fact:
         totaluni: "{{ totaluni|default(0)|int + unidata.json.result.records[item]['graduates']|int }}"
       loop: "{{ range(0,datanum|int,2)|list }}"
-    - shell: echo "Total University Graduates:{{ totaluni }}" >> it_uni_data.csv
+    - shell: echo "Total University Graduates:{{ totaluni }}" | tee -a it_uni_data.csv finaldata.txt
+    - shell: cat it_uni_data.csv
+      register: uni_data_final
     - debug:
-        msg: "Total University Graduates: {{ totaluni }}"
+        msg: "{{ uni_data_final.stdout_lines }}"
 
     - name: Query IT polytechnic graduate data
       uri:
@@ -33,26 +32,27 @@
         return_content: yes
         method: GET
       register: polydata
-    - debug:
-        msg: "Course: {{ polydata.json.result.records[item]['course'] }} Year: {{ polydata.json.result.records[item]['year'] }} Sex: {{ polydata.json.result.records[item]['sex'] }} Graduates: {{ polydata.json.result.records[item]['graduates'] }}"
-      loop: "{{ range(0,datanum|int,2) |list }}" # note: ranges for only sex:MF
 
-    - name: Output content for poly graduates to file
+    - name: Save polytechnic graduates data to csv file
       shell: echo "Course:{{ polydata.json.result.records[item]['course'] }} Year:{{ polydata.json.result.records[item]['year'] }} Sex:{{ polydata.json.result.records[item]['sex'] }} Graduates:{{ polydata.json.result.records[item]['graduates'] }}" >> it_poly_data.csv
       loop: "{{ range(0,datanum|int,2) |list }}"
 
-    - name: Calculate total number of IT poly graduates and print to file
+    - name: Calculate total number of IT poly graduates and add to csv file
       set_fact:
         totalpoly: "{{ totalpoly|default(0)|int + polydata.json.result.records[item]['graduates']|int }}"
       loop: "{{ range(0,datanum|int,2)|list }}"
-    - shell: echo "Total Polytechnic Graduates:{{ totalpoly }}" >> it_poly_data.csv
+    - shell: echo "Total Polytechnic Graduates:{{ totalpoly }}" | tee -a it_poly_data.csv finaldata.txt
+    - shell: cat it_poly_data.csv
+      register: poly_data_final
     - debug:
-        msg: "Total Polytechnic Graduates: {{ totalpoly }}"
+        msg: "{{ poly_data_final.stdout_lines }}"
 
     - name: Calculate the total number of IT graduates from University and Polytechnic
       set_fact:
         total: "{{ totaluni|int + totalpoly|int }}"
-    - debug:
-        msg: "Total Number of IT Graduates:{{ total }}"
     - shell: echo "Total Number of IT Graduates:{{ total }}" >> finaldata.txt
+    - shell: cat finaldata.txt
+      register: graduates_data
+    - debug:
+        msg: "{{ graduates_data.stdout_lines }}"
     
