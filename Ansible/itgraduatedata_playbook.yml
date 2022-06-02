@@ -3,6 +3,7 @@
   become: yes
   vars:
     datanum: "{{ unidata.json.result.records| count }}"
+    
   tasks:
     - name: Query IT university graduate data
       uri:
@@ -13,9 +14,11 @@
     - debug:
         msg: "Course: {{ unidata.json.result.records[item]['course'] }} Year: {{ unidata.json.result.records[item]['year'] }} Sex: {{ unidata.json.result.records[item]['sex'] }} Graduates: {{ unidata.json.result.records[item]['graduates'] }}"
       loop: "{{ range(0, datanum|int,2) |list }}" # note: ranges for only sex:MF
+
     - name: Output content for uni graduates to file
       shell: echo "Course:{{ unidata.json.result.records[item]['course'] }} Year:{{ unidata.json.result.records[item]['year'] }} Sex:{{ unidata.json.result.records[item]['sex'] }} Graduates:{{ unidata.json.result.records[item]['graduates'] }}" >> it_uni_data.csv
       loop: "{{ range(0,datanum|int,2) |list }}"
+
     - name: Calculate total number of IT university graduates and print to file
       set_fact:
         totaluni: "{{ totaluni|default(0)|int + unidata.json.result.records[item]['graduates']|int }}"
@@ -23,6 +26,7 @@
     - shell: echo "Total University Graduates:{{ totaluni }}" >> it_uni_data.csv
     - debug:
         msg: "Total University Graduates: {{ totaluni }}"
+
     - name: Query IT polytechnic graduate data
       uri:
         url: https://data.gov.sg/api/action/datastore_search?resource_id=f358cf0d-61fa-4eeb-93a2-1eca971cf1a4&q=information+technology
@@ -32,9 +36,11 @@
     - debug:
         msg: "Course: {{ polydata.json.result.records[item]['course'] }} Year: {{ polydata.json.result.records[item]['year'] }} Sex: {{ polydata.json.result.records[item]['sex'] }} Graduates: {{ polydata.json.result.records[item]['graduates'] }}"
       loop: "{{ range(0,datanum|int,2) |list }}" # note: ranges for only sex:MF
+
     - name: Output content for poly graduates to file
       shell: echo "Course:{{ polydata.json.result.records[item]['course'] }} Year:{{ polydata.json.result.records[item]['year'] }} Sex:{{ polydata.json.result.records[item]['sex'] }} Graduates:{{ polydata.json.result.records[item]['graduates'] }}" >> it_poly_data.csv
       loop: "{{ range(0,datanum|int,2) |list }}"
+
     - name: Calculate total number of IT poly graduates and print to file
       set_fact:
         totalpoly: "{{ totalpoly|default(0)|int + polydata.json.result.records[item]['graduates']|int }}"
@@ -42,6 +48,7 @@
     - shell: echo "Total Polytechnic Graduates:{{ totalpoly }}" >> it_poly_data.csv
     - debug:
         msg: "Total Polytechnic Graduates: {{ totalpoly }}"
+
     - name: Calculate the total number of IT graduates from University and Polytechnic
       set_fact:
         total: "{{ totaluni|int + totalpoly|int }}"
