@@ -1,4 +1,4 @@
-# Jane's Portfolio
+# Jane's Learning Practices
 
 This is a collection of the scripts and codes written by me while learning.
 
